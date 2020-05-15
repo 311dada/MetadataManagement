@@ -6,7 +6,7 @@ from metadata import metadata
 
 class Server:
     def __init__(self):
-        self.record = defaultdict([])
+        self.record = defaultdict(list)
         cfg = ConfigParser()
         cfg.read("../config/Server_config.ini")
         self.port = cfg.getint("network", "port")
