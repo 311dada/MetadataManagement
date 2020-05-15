@@ -65,9 +65,9 @@ class Client:
                 to_MDS = BKDRHash(sample.path, self.seed, self.mds_num)
                 mds_ip = self.mds[to_MDS]
                 s.connect((mds_ip, self.port))
-                
+
                 s.sendall(f"input:{line}".encode())
-        s.close()
+                s.close()
 
 
 if __name__ == "__main__":
