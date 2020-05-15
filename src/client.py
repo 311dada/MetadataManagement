@@ -66,7 +66,7 @@ class Client:
                 mds_ip = self.mds[to_MDS]
                 s.connect((mds_ip, self.port))
 
-                s.sendall(f"input:{line}".encode())
+                s.sendall(f"input -> {line}".encode())
                 s.close()
 
 

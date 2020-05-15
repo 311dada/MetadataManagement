@@ -20,7 +20,7 @@ class Server:
             conn, addr = s.accept()
             request = conn.recv(4096).decode()
             print(f"server: {request}")
-            command, content = request.split(':')
+            command, content = request.split(' -> ')
             if command == 'input':
                 sample = metadata(content)
                 self.record[sample.path].append(command)
