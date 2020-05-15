@@ -1,7 +1,7 @@
 class metadata:
     def __init__(self, sample):
         temp = sample.split(', ')
-        print(temp        self.path, self.size, self.isdir, self.type, self.time = temp
+        self.path, self.size, self.isdir, self.type, self.time = temp
 
     def to_string(self):
         return " ".join(
