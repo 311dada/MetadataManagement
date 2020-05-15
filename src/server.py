@@ -27,4 +27,12 @@ class Server:
         conn.close()
         s.close()
 
+    def run(self):
+        print("A MDS is starting...")
+        print("The MDS is listening...")
+        self.response()
 
+
+if __name__ == "__main__":
+    server = Server()
+    server.run()
