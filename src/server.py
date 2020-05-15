@@ -13,12 +13,15 @@ class Server:
         self.port = cfg.getint("network", "port")
 
     def new_thread(self, conn):
-        request = conn.recv(4096).decode()
-        print(f"server: {request}")
-        command, content = request.split(' -> ')
-        if command == 'input':
-            sample = metadata(content)
-            self.record[sample.path].append(command)
+        while True:
+            request = conn.recv(4096).decode()
+            if request == "#finished#":
+                break
+            print(f"server: {request}")
+            command, content = request.split(' -> ')
+            if command == 'input':
+                sample = metadata(content)
+                self.record[sample.path].append(command)
         conn.close()
     
     def response(self):

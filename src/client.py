@@ -70,6 +70,7 @@ class Client:
 
                 sockets[to_MDS].sendall(f"input -> {line}".encode())
         for i in range(self.mds_num):
+            sockets[i].sendall("#finished#".encode())
             sockets[i].close()
 
 
