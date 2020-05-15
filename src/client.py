@@ -60,12 +60,13 @@ class Client:
         with open(input_file, "r") as f:
             while True:
                 line = f.readline().strip()
+                print(f"client: {line}")
                 sample = metadata(line)
                 to_MDS = BKDRHash(sample.path, self.seed, self.mds_num)
                 mds_ip = self.mds[to_MDS]
                 s.connect((mds_ip, self.port))
-                print(f"client: {line}")
-                s.sendall(f"input:{line}")
+                
+                s.sendall(f"input:{line}".encode())
         s.close()
 
 

@@ -19,7 +19,7 @@ class Server:
         while True:
             conn, addr = s.accept()
             request = conn.recv(4096)
-            print(f"server: {request}")
+            print(f"server: {request.decode()}")
             command, content = request.split(':')
             if command == 'input':
                 sample = metadata(content)
