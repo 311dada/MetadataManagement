@@ -28,7 +28,7 @@ class Server:
 
         while True:
             conn, addr = s.accept()
-            start_new_thread(new_thread, (conn))
+            start_new_thread(self.new_thread, (conn, ))
 
         s.close()
 
