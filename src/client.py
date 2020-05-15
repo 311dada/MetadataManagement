@@ -56,18 +56,21 @@ class Client:
 
     # Execute the input command
     def _input(self, input_file):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sockets = [socket.socket(socket.AF_INET, socket.SOCK_STREAM) for i in range(self.mds_num)]
+        for i in range(self.mds_num):
+            sockets[i].connect((self.mds[i], self.port))
         with open(input_file, "r") as f:
             while True:
                 line = f.readline().strip()
+                if not line:
+                    break
                 print(f"client: {line}")
                 sample = metadata(line)
                 to_MDS = BKDRHash(sample.path, self.seed, self.mds_num)
-                mds_ip = self.mds[to_MDS]
-                s.connect((mds_ip, self.port))
 
-                s.sendall(f"input -> {line}".encode())
-                s.close()
+                sockets[to_MDS].sendall(f"input -> {line}".encode())
+        for i in range(self.mds_num):
+            sockets[i].close()
 
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@ import socket
 from configparser import ConfigParser
 from collections import defaultdict
 from metadata import metadata
+from _thread import start_new_thread
 
 
 class Server:
@@ -11,6 +12,15 @@ class Server:
         cfg.read("../config/Server_config.ini")
         self.port = cfg.getint("network", "port")
 
+    def new_thread(self, conn):
+        request = conn.recv(4096).decode()
+        print(f"server: {request}")
+        command, content = request.split(' -> ')
+        if command == 'input':
+            sample = metadata(content)
+            self.record[sample.path].append(command)
+        conn.close()
+    
     def response(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind(('', self.port))
@@ -18,13 +28,8 @@ class Server:
 
         while True:
             conn, addr = s.accept()
-            request = conn.recv(4096).decode()
-            print(f"server: {request}")
-            command, content = request.split(' -> ')
-            if command == 'input':
-                sample = metadata(content)
-                self.record[sample.path].append(command)
-        conn.close()
+            start_new_thread(new_thread, (conn))
+
         s.close()
 
     def run(self):
