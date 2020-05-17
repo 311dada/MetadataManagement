@@ -37,7 +37,7 @@ class Server:
                 self.record[dir_path][1].add(filename)
             print(self.record)
 
-        conn.close()
+        
 
     def response(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
