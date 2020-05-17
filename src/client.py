@@ -118,7 +118,17 @@ class Client:
             self._stat(formated_command[1])
 
         elif formated_command[0] == "readdir":
-            self._readdir(formated_command[1])
+            path = formated_command[1]
+            if '/' != path[0]:
+                path = '/' + path
+            resp = self._query_path(path)
+            if not resp:
+                print(
+                    "Invalid readdir command: the directory path does not exist.")
+
+            elif resp == 'no':
+                print("Invalid readdir command: the path is not a directory.")
+                self._readdir(formated_command[1])
 
         elif formated_command[0] == "distribute":
             self._get_distribution()
@@ -153,7 +163,7 @@ class Client:
             self._add_to_dir(filename, pre_path)
 
     def _mkdir(self, path):
-        if '/' not in path:
+        if '/' != path[0]:
             path = '/' + path
         temp = path.split("/")
         pre_path = '/'.join(temp[:-1])
@@ -171,7 +181,7 @@ class Client:
             self._add_to_dir(filename, pre_path)
 
     def _touch(self, path):
-        if '/' not in path:
+        if '/' != path[0]:
             path = '/' + path
         temp = path.split("/")
         pre_path = '/'.join(temp[:-1])
@@ -189,30 +199,23 @@ class Client:
             self._add_to_dir(filename, pre_path)
 
     def _readdir(self, path):
-        resp = self._query_path(path)
-        if not resp:
+        result = self._query(path)
+        dir_or_file_list = []
+        if result:
+            dir_or_file_list = result.split(";;")
+            for next_path in dir_or_file_list:
+                new_path = path + "/" + next_path
+                self._readdir(new_path)
+        if not dir_or_file_list:
             print(
-                "Invalid readdir command: the directory path does not exist.")
-
-        elif resp == 'no':
-            print("Invalid readdir command: the path is not a directory.")
-
+                f"{path}: there are no files or directories in this directory."
+            )
         else:
-            result = self._query(path)
-            dir_or_file_list = []
-            if result:
-                dir_or_file_list = result.split(";;")
-                for next_path in dir_or_file_list:
-                    new_path = path + "/" + next_path
-                    self._readdir(new_path)
-            if not dir_or_file_list:
-                print(
-                    f"{path}: there are no files or directories in this directory."
-                )
-            else:
-                print(f"{path}: {', '.join(dir_or_file_list)}")
+            print(f"{path}: {', '.join(dir_or_file_list)}")
 
     def _stat(self, path):
+        if '/' != path[0]:
+            path = '/' + path
         if not self._query_path(path):
             print(
                 "Invalid stat command: the file or directory does not exist.")
@@ -308,6 +311,8 @@ class Client:
 
     # Remove a path
     def _remove(self, path):
+        if '/' != path[0]:
+            path = '/' + path
         result = self._query(path)
         if result:
             dir_or_file_list = result.split(";;")
