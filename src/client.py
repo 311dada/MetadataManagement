@@ -62,10 +62,8 @@ class Client:
             socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             for i in range(self.mds_num)
         ]
-        print("fuck\n")
         for i in range(self.mds_num):
             sockets[i].connect((self.mds[i], self.port))
-        print("fuck\n")
         with open(input_file, "r") as f:
             while True:
                 line = f.readline().strip()
@@ -90,10 +88,11 @@ class Client:
         pre_path = None
         cur_index = -1
 
-        to_MDS = BKDRHash(sample.path)
+        to_MDS = BKDRHash(sample.path, self.seed, self.mds_num)
         self._insert(sockets[to_MDS], sample)
 
         while pre_path != '/':
+            print(pre_path)
             pre_path = '/'.join(temp[:cur_index])
             filename = temp[cur_index]
             cur_index -= 1
@@ -105,7 +104,7 @@ class Client:
     def _query_path(self, path):
         to_MDS = BKDRHash(path, self.seed, self.mds_num)
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect(self.mds[to_MDS], self.port)
+        s.connect((self.mds[to_MDS], self.port))
         s.sendall(f"query_path -> {path}".encode())
         result = s.recv(4096).decode()
         s.sendall("#finished#".encode())
@@ -134,7 +133,7 @@ class Client:
         s.close()
 
     def _insert(self, s, sample):
-        s.sendall(f"insert -> {sample.to_strin()}".encode())
+        s.sendall(f"insert -> {sample.to_string()}".encode())
 
     def _add_to_dir(self, filename, dir_path):
         to_MDS = BKDRHash(dir_path)

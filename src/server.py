@@ -25,7 +25,7 @@ class Server:
                 else:
                     self.record[sample.path][0] = content
 
-            elif command == 'query_test':
+            elif command == 'query_path':
                 if content in self.record:
                     resp = 'Y'
                 else:
