@@ -27,7 +27,7 @@ class Server:
 
             elif command == 'query_path':
                 if content in self.record:
-                    resp = 'Y'
+                    resp = self.record[content][0].split(', ')[2]
                 else:
                     resp = 'N'
                 conn.sendall(resp.encode())
@@ -35,6 +35,29 @@ class Server:
             elif command == 'add_dir':
                 dir_path, filename = content.split(':')
                 self.record[dir_path][1].add(filename)
+
+            elif command == 'query':
+                if content in self.record:
+                    resp = ';;'.join(list(self.record[content][1]))
+                else:
+                    resp = ''
+                conn.sendall(resp.encode())
+            elif command == 'remove':
+                if content in self.record:
+                    del self.record[content]
+
+            elif command == 'query_metadata':
+                resp = self.record[content][0]
+                conn.sendall(resp.encode())
+
+            elif command == 'distribution':
+                resp = sorted(self.record.keys())
+                resp = "\n".join(list(map(lambda x: "\t" + x, resp)))
+                conn.sendall(resp.encode())
+
+            else:
+                print("No corresponding response.")
+
             print(self.record)
         conn.close()
 
