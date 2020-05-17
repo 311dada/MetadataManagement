@@ -58,12 +58,6 @@ class Client:
 
     # Execute the input command
     def _input(self, input_file):
-        sockets = [
-            socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            for i in range(self.mds_num)
-        ]
-        for i in range(self.mds_num):
-            sockets[i].connect((self.mds[i], self.port))
         with open(input_file, "r") as f:
             while True:
                 line = f.readline().strip()
@@ -76,21 +70,16 @@ class Client:
                 # sockets[to_MDS].sendall(f"input -> {line}".encode())
                 # time.sleep(0.1)
                 print(line)
-                self._initialize_insert(sockets, line)
+                self._initialize_insert(line)
 
-        for i in range(self.mds_num):
-            sockets[i].sendall("#finished#".encode())
-            time.sleep(0.1)
-            sockets[i].close()
 
-    def _initialize_insert(self, sockets, line):
+    def _initialize_insert(self, line):
         sample = metadata(line)
         temp = sample.path.split("/")
         pre_path = None
         cur_index = -1
 
-        to_MDS = BKDRHash(sample.path, self.seed, self.mds_num)
-        self._insert(sockets[to_MDS], sample)
+        self._insert(sample)
 
         while pre_path != '/':
             print(pre_path)
@@ -138,10 +127,14 @@ class Client:
         s.sendall("#finished#".encode())
         s.close()
 
-    def _insert(self, s, sample):
+    def _insert(self, sample):
+        to_MDS = BKDRHash(sample.path, self.seed, self.mds_num)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((self.mds[to_MDS], self.port))
         s.sendall(f"insert -> {sample.to_string()}".encode())
         time.sleep(0.1)
         s.sendall("#finished#".encode())
+        s.close()
 
     def _add_to_dir(self, filename, dir_path):
         to_MDS = BKDRHash(dir_path, self.seed, self.mds_num)
