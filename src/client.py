@@ -129,6 +129,7 @@ class Client:
         time_stamp = datetime.datetime.now()
         ctime = '"' + time_stamp.strftime('%Y-%m-%d %H:%M:%S') + '"'
         line_sample = ', '.join([path, '10', isdir, ftype, ctime])
+        print(line_sample)
         to_MDS = BKDRHash(path, self.seed, self.mds_num)
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((self.mds[to_MDS], self.port))
