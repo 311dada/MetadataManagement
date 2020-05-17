@@ -5,6 +5,8 @@ from metadata import metadata
 from configparser import ConfigParser
 import socket
 from Hash import BKDRHash
+import datetime
+import time
 
 
 class Client:
@@ -56,22 +58,96 @@ class Client:
 
     # Execute the input command
     def _input(self, input_file):
-        sockets = [socket.socket(socket.AF_INET, socket.SOCK_STREAM) for i in range(self.mds_num)]
+        sockets = [
+            socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            for i in range(self.mds_num)
+        ]
+        print("fuck\n")
         for i in range(self.mds_num):
             sockets[i].connect((self.mds[i], self.port))
+        print("fuck\n")
         with open(input_file, "r") as f:
             while True:
                 line = f.readline().strip()
                 if not line:
                     break
-                print(f"client: {line}")
-                sample = metadata(line)
-                to_MDS = BKDRHash(sample.path, self.seed, self.mds_num)
+                # print(f"client: {line}")
+                # sample = metadata(line)
+                # to_MDS = BKDRHash(sample.path, self.seed, self.mds_num)
 
-                sockets[to_MDS].sendall(f"input -> {line}".encode())
+                # sockets[to_MDS].sendall(f"input -> {line}".encode())
+                # time.sleep(0.1)
+                self._initialize_insert(sockets, line)
+
         for i in range(self.mds_num):
             sockets[i].sendall("#finished#".encode())
+            time.sleep(0.1)
             sockets[i].close()
+
+    def _initialize_insert(self, sockets, line):
+        sample = metadata(line)
+        temp = sample.path.split("/")
+        pre_path = None
+        cur_index = -1
+
+        to_MDS = BKDRHash(sample.path)
+        self._insert(sockets[to_MDS], sample)
+
+        while pre_path != '/':
+            pre_path = '/'.join(temp[:cur_index])
+            filename = temp[cur_index]
+            cur_index -= 1
+            if not self._query_path(pre_path):
+                self._create(pre_path, "yes")
+            self._add_to_dir(filename, pre_path)
+
+    # Query the MDS if a path exists
+    def _query_path(self, path):
+        to_MDS = BKDRHash(path, self.seed, self.mds_num)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect(self.mds[to_MDS], self.port)
+        s.sendall(f"query_path -> {path}".encode())
+        result = s.recv(4096).decode()
+        s.sendall("#finished#".encode())
+        s.close()
+
+        if result == "Y":
+            return True
+        else:
+            return False
+
+    def _create(self, path, isdir):
+        filename = path.split('/')[-1]
+        if '.' in filename:
+            ftype = filename.split('.')[-1]
+        else:
+            ftype = 'txt'
+
+        time_stamp = datetime.datetime.now()
+        ctime = '"' + time_stamp.strftime('%Y-%m-%d %H:%M:%S') + '"'
+        line_sample = ', '.join([path, 10, isdir, ftype, ctime])
+        to_MDS = BKDRHash(path)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect(self.mds[to_MDS], self.port)
+        s.sendall(f"insert -> {line_sample}".encode())
+        s.sendall("#finished#".encode())
+        s.close()
+
+    def _insert(self, s, sample):
+        s.sendall(f"insert -> {sample.to_strin()}".encode())
+
+    def _add_to_dir(self, filename, dir_path):
+        to_MDS = BKDRHash(dir_path)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect(self.mds[to_MDS], self.port)
+        msg = dir_path + ':' + filename
+        s.sendall(f"add_dir -> {msg}".encode())
+        s.sendall("#finished#".encode())
+        s.close()
+
+    # Remove a path
+    def _remove(self, path):
+        pass
 
 
 if __name__ == "__main__":

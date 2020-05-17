@@ -1,13 +1,12 @@
 import socket
 from configparser import ConfigParser
-from collections import defaultdict
 from metadata import metadata
 from _thread import start_new_thread
 
 
 class Server:
     def __init__(self):
-        self.record = defaultdict(list)
+        self.record = dict()
         cfg = ConfigParser()
         cfg.read("../config/Server_config.ini")
         self.port = cfg.getint("network", "port")
@@ -19,11 +18,26 @@ class Server:
                 break
             print(f"server: {request}")
             command, content = request.split(' -> ')
-            if command == 'input':
+            if command == 'insert':
                 sample = metadata(content)
-                self.record[sample.path].append(command)
+                if sample.path not in self.record:
+                    self.record[sample.path] = (content, set())
+                else:
+                    self.record[sample.path][0] = content
+
+            elif command == 'query_test':
+                if content in self.record:
+                    resp = 'Y'
+                else:
+                    resp = 'N'
+                conn.sendall(resp.encode())
+
+            elif command == 'add_dir':
+                dir_path, filename = content.split(':')
+                self.record[dir_path][1].add(filename)
+
         conn.close()
-    
+
     def response(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind(('', self.port))
