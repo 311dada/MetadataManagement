@@ -94,6 +94,8 @@ class Client:
         while pre_path != '/':
             print(pre_path)
             pre_path = '/'.join(temp[:cur_index])
+            if pre_path == '':
+                pre_path = '/'
             filename = temp[cur_index]
             cur_index -= 1
             if not self._query_path(pre_path):
@@ -124,10 +126,10 @@ class Client:
 
         time_stamp = datetime.datetime.now()
         ctime = '"' + time_stamp.strftime('%Y-%m-%d %H:%M:%S') + '"'
-        line_sample = ', '.join([path, 10, isdir, ftype, ctime])
-        to_MDS = BKDRHash(path)
+        line_sample = ', '.join([path, '10', isdir, ftype, ctime])
+        to_MDS = BKDRHash(path, self.seed, self.mds_num)
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect(self.mds[to_MDS], self.port)
+        s.connect((self.mds[to_MDS], self.port))
         s.sendall(f"insert -> {line_sample}".encode())
         s.sendall("#finished#".encode())
         s.close()
@@ -136,9 +138,9 @@ class Client:
         s.sendall(f"insert -> {sample.to_string()}".encode())
 
     def _add_to_dir(self, filename, dir_path):
-        to_MDS = BKDRHash(dir_path)
+        to_MDS = BKDRHash(dir_path, self.seed, self.mds_num)
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect(self.mds[to_MDS], self.port)
+        s.connect((self.mds[to_MDS], self.port))
         msg = dir_path + ':' + filename
         s.sendall(f"add_dir -> {msg}".encode())
         s.sendall("#finished#".encode())

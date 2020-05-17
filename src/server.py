@@ -21,7 +21,7 @@ class Server:
             if command == 'insert':
                 sample = metadata(content)
                 if sample.path not in self.record:
-                    self.record[sample.path] = (content, set())
+                    self.record[sample.path] = [content, set()]
                 else:
                     self.record[sample.path][0] = content
 
