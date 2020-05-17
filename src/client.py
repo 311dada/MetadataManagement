@@ -75,6 +75,7 @@ class Client:
 
                 # sockets[to_MDS].sendall(f"input -> {line}".encode())
                 # time.sleep(0.1)
+                print(line)
                 self._initialize_insert(sockets, line)
 
         for i in range(self.mds_num):
@@ -101,6 +102,7 @@ class Client:
             if not self._query_path(pre_path):
                 self._create(pre_path, "yes")
             self._add_to_dir(filename, pre_path)
+        
 
     # Query the MDS if a path exists
     def _query_path(self, path):
@@ -131,11 +133,14 @@ class Client:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((self.mds[to_MDS], self.port))
         s.sendall(f"insert -> {line_sample}".encode())
+        time.sleep(0.1)
         s.sendall("#finished#".encode())
         s.close()
 
     def _insert(self, s, sample):
         s.sendall(f"insert -> {sample.to_string()}".encode())
+        time.sleep(0.1)
+        s.sendall("#finished#".encode())
 
     def _add_to_dir(self, filename, dir_path):
         to_MDS = BKDRHash(dir_path, self.seed, self.mds_num)

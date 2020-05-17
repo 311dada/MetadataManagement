@@ -5,5 +5,5 @@ class metadata:
         self.path = self.path.rstrip("/")
 
     def to_string(self):
-        return " ".join(
+        return ", ".join(
             [self.path, self.size, self.isdir, self.type, self.time])

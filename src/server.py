@@ -35,6 +35,7 @@ class Server:
             elif command == 'add_dir':
                 dir_path, filename = content.split(':')
                 self.record[dir_path][1].add(filename)
+            print(self.record)
 
         conn.close()
 
