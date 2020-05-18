@@ -122,12 +122,11 @@ class Client:
             if '/' != path[0]:
                 path = '/' + path
             resp = self._query_path(path)
-            print(resp)
             if not resp:
                 print(
                     "Invalid readdir command: the directory path does not exist.")
 
-            elif resp == 'no':
+            elif resp == 'yes':
                 print("Invalid readdir command: the path is not a directory.")
                 self._readdir(formated_command[1])
 

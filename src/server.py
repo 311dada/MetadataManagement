@@ -63,7 +63,7 @@ class Server:
             else:
                 print("No corresponding response.")
 
-            # print(self.record)
+            print(self.record)
         conn.close()
 
     def response(self):
