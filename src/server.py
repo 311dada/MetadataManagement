@@ -15,7 +15,7 @@ class Server:
         while True:
             request = conn.recv(4096).decode()
             if request == "#finished#":
-                conn.sendall("#finished#")
+                conn.sendall("#finished#".encode())
                 break
             print(f"server: {request}")
             command, content = request.split(' -> ')
