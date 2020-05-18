@@ -204,7 +204,7 @@ class Client:
     def _readdir(self, path):
         result = self._query(path)
         dir_or_file_list = []
-        if result:
+        if result != "##none##":
             dir_or_file_list = result.split(";;")
             for next_path in dir_or_file_list:
                 new_path = path + "/" + next_path
@@ -317,7 +317,7 @@ class Client:
             path = '/' + path
         result = self._query(path)
         print(result)
-        if result:
+        if result != "##none##":
             dir_or_file_list = result.split(";;")
             for next_path in dir_or_file_list:
                 new_path = path + "/" + next_path

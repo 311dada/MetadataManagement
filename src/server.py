@@ -40,7 +40,7 @@ class Server:
                 if content in self.record:
                     resp = ';;'.join(list(self.record[content][1]))
                 else:
-                    resp = ''
+                    resp = '##none##'
                 conn.sendall(resp.encode())
             elif command == 'remove':
                 if content in self.record:
@@ -51,8 +51,11 @@ class Server:
                 conn.sendall(resp.encode())
 
             elif command == 'distribution':
-                resp = sorted(self.record.keys())
-                resp = "\n".join(list(map(lambda x: "\t" + x, resp)))
+                if self.record:
+                    resp = sorted(self.record.keys())
+                    resp = "\n".join(list(map(lambda x: "\t" + x, resp)))
+                else:
+                    resp = "Empty"
                 conn.sendall(resp.encode())
 
             else:
