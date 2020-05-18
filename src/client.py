@@ -67,9 +67,9 @@ class Client:
                 )
                 formated_command = None
 
-        elif formated_command[0] == "remove":
+        elif formated_command[0] == "rm":
             if len(formated_command) > 3 or len(
-                    formated_command) == 3 and formated_command[2] != '-r':
+                    formated_command) == 3 and formated_command[1] != '-r':
                 print("Invalid rm command: rm <filename> or rm -r <directory>")
                 formated_command = None
 
@@ -122,6 +122,7 @@ class Client:
             if '/' != path[0]:
                 path = '/' + path
             resp = self._query_path(path)
+            print(resp)
             if not resp:
                 print(
                     "Invalid readdir command: the directory path does not exist.")
@@ -140,7 +141,6 @@ class Client:
                 line = f.readline().strip()
                 if not line:
                     break
-                print(line)
                 self._initialize_insert(line)
 
     def _initialize_insert(self, line):
@@ -152,7 +152,6 @@ class Client:
         self._insert(sample)
 
         while pre_path != '/':
-            print(pre_path)
             pre_path = '/'.join(temp[:cur_index])
             if pre_path == '':
                 pre_path = '/'
@@ -165,6 +164,10 @@ class Client:
     def _mkdir(self, path):
         if '/' != path[0]:
             path = '/' + path
+        
+        if path == "/":
+            self._create(path, "yes")
+            return
         temp = path.split("/")
         pre_path = '/'.join(temp[:-1])
         filename = temp[-1]
@@ -272,7 +275,6 @@ class Client:
         time_stamp = datetime.datetime.now()
         ctime = '"' + time_stamp.strftime('%Y-%m-%d %H:%M:%S') + '"'
         line_sample = ', '.join([path, '10', isdir, ftype, ctime])
-        print(line_sample)
         to_MDS = BKDRHash(path, self.seed, self.mds_num)
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((self.mds[to_MDS], self.port))
@@ -314,10 +316,12 @@ class Client:
         if '/' != path[0]:
             path = '/' + path
         result = self._query(path)
+        print(result)
         if result:
             dir_or_file_list = result.split(";;")
             for next_path in dir_or_file_list:
                 new_path = path + "/" + next_path
+                print(new_path)
                 self._remove(new_path)
         self._rm_dir_or_filename(path)
 
@@ -328,6 +332,7 @@ class Client:
             s.sendall("distribution -> ...".encode())
             distribution = s.recv(4096).decode()
             print(f"MDS {to_MDS + 1}:\n{distribution}")
+            s.sendall("#finished#".encode())
             s.close()
 
 

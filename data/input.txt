@@ -2,3 +2,5 @@
 /temp/, 4, yes, none, "2020-04-07 10:25:36"
 /test/a.txt, 1000, no, txt, "2020-05-07 10:25:09"
 /home/John/download/test.txt, 10000, no, txt, "2019-05-07 10:25:09"
+/home/david/download/test.txt, 10000, no, txt, "2019-05-07 10:25:19"
+/home/John/download/test.mp4, 10000, no, mp4, "2019-05-07 10:25:09"
