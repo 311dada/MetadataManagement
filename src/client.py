@@ -63,7 +63,7 @@ class Client:
         elif formated_command[0] == "touch":
             if len(formated_command) != 2:
                 print(
-                    "Invalid mkdir command: an absolute directory path is required."
+                    "Invalid touch command: an absolute directory path is required."
                 )
                 formated_command = None
 
@@ -219,7 +219,6 @@ class Client:
         if result != "##none##":
             dir_or_file_list = result.split(";;")
 
-
         contents = []
         mark = []
         next_pathes = []
@@ -268,7 +267,9 @@ class Client:
         s.sendall(f"query_path -> {path}".encode())
         result = s.recv(4096).decode()
         s.sendall("#finished#".encode())
-        s.close()
+        temp = s.recv(4096).decode()
+        if temp == "#finished#":
+            s.close()
 
         if result == "N":
             return False
@@ -282,7 +283,9 @@ class Client:
         s.sendall(f"query -> {path}".encode())
         result = s.recv(4096).decode()
         s.sendall("#finished#".encode())
-        s.close()
+        temp = s.recv(4096).decode()
+        if temp == "#finished#":
+            s.close()
         return result
 
     def _query_metadata(self, path):
@@ -292,7 +295,9 @@ class Client:
         s.sendall(f"query_metadata -> {path}".encode())
         result = s.recv(4096).decode()
         s.sendall("#finished#".encode())
-        s.close()
+        temp = s.recv(4096).decode()
+        if temp == "#finished#":
+            s.close()
         return result
 
     def _create(self, path, isdir):
@@ -314,7 +319,9 @@ class Client:
         s.sendall(f"insert -> {line_sample}".encode())
         time.sleep(0.1)
         s.sendall("#finished#".encode())
-        s.close()
+        temp = s.recv(4096).decode()
+        if temp == "#finished#":
+            s.close()
 
     def _insert(self, sample):
         to_MDS = BKDRHash(sample.path, self.seed, self.mds_num)
@@ -323,7 +330,9 @@ class Client:
         s.sendall(f"insert -> {sample.to_string()}".encode())
         time.sleep(0.1)
         s.sendall("#finished#".encode())
-        s.close()
+        temp = s.recv(4096).decode()
+        if temp == "#finished#":
+            s.close()
 
     def _add_to_dir(self, filename, dir_path):
         to_MDS = BKDRHash(dir_path, self.seed, self.mds_num)
@@ -333,7 +342,9 @@ class Client:
         s.sendall(f"add_dir -> {msg}".encode())
         time.sleep(0.1)
         s.sendall("#finished#".encode())
-        s.close()
+        temp = s.recv(4096).decode()
+        if temp == "#finished#":
+            s.close()
 
     def _rm_dir_or_filename(self, path):
         to_MDS = BKDRHash(path, self.seed, self.mds_num)
@@ -342,7 +353,9 @@ class Client:
         s.sendall(f"remove -> {path}".encode())
         time.sleep(0.1)
         s.sendall("#finished#".encode())
-        s.close()
+        temp = s.recv(4096).decode()
+        if temp == "#finished#":
+            s.close()
 
     # Remove a path
     def _remove(self, path):
@@ -365,7 +378,9 @@ class Client:
             distribution = s.recv(4096).decode()
             print(f"MDS {to_MDS + 1}:\n{distribution}")
             s.sendall("#finished#".encode())
-            s.close()
+            temp = s.recv(4096).decode()
+            if temp == "#finished#":
+                s.close()
 
 
 if __name__ == "__main__":

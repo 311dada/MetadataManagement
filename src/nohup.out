@@ -1,0 +1,9 @@
+Start the POSIX API based client...
+Welcome to use the simple client. It supports a basic POSIX command set: mkdir, touch, readdir, rm, stat, input, distribute
+
+command[quit: q]: Traceback (most recent call last):
+  File "client.py", line 373, in <module>
+    client.run()
+  File "client.py", line 34, in run
+    command = input("command[quit: q]: ")
+EOFError: EOF when reading a line

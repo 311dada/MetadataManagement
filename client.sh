@@ -1,4 +1,4 @@
 #!/bin/bash
 
 cd src
-nohup python3 client.py &
+python3 client.py

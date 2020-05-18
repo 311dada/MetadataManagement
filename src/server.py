@@ -1,7 +1,7 @@
 import socket
 from configparser import ConfigParser
 from metadata import metadata
-from _thread import start_new_thread
+# from _thread import start_new_thread
 
 
 class Server:
@@ -15,6 +15,7 @@ class Server:
         while True:
             request = conn.recv(4096).decode()
             if request == "#finished#":
+                conn.sendall("#finished#")
                 break
             print(f"server: {request}")
             command, content = request.split(' -> ')
