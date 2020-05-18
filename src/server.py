@@ -40,7 +40,9 @@ class Server:
                 if content in self.record:
                     resp = ';;'.join(list(self.record[content][1]))
                 else:
-                    resp = '##none##'
+                    resp = ''
+                if not resp:
+                    resp = "##none##"
                 conn.sendall(resp.encode())
             elif command == 'remove':
                 if content in self.record:
