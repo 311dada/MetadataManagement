@@ -112,7 +112,18 @@ class Client:
             self._touch(formated_command[1])
 
         elif formated_command[0] == "rm":
-            self._remove(formated_command[-1])
+            path = formated_command[-1]
+            if '/' != path[0]:
+                path = '/' + path
+            resp = self._query_path(path)
+
+            if len(formated_command) == 2:
+                if resp == 'yes':
+                    print("Invalid rm command: the path must be a file.")
+                else:
+                    self._rm_dir_or_filename(path)
+            else:
+                self._remove(path)
 
         elif formated_command[0] == "stat":
             self._stat(formated_command[1])
@@ -124,11 +135,13 @@ class Client:
             resp = self._query_path(path)
             if not resp:
                 print(
-                    "Invalid readdir command: the directory path does not exist.")
+                    "Invalid readdir command: the directory path does not exist."
+                )
 
             elif resp == 'yes':
+                self._readdir(path)
+            else:
                 print("Invalid readdir command: the path is not a directory.")
-                self._readdir(formated_command[1])
 
         elif formated_command[0] == "distribute":
             self._get_distribution()
@@ -163,7 +176,7 @@ class Client:
     def _mkdir(self, path):
         if '/' != path[0]:
             path = '/' + path
-        
+
         if path == "/":
             self._create(path, "yes")
             return
@@ -205,15 +218,36 @@ class Client:
         dir_or_file_list = []
         if result != "##none##":
             dir_or_file_list = result.split(";;")
-            for next_path in dir_or_file_list:
+
+
+        contents = []
+        mark = []
+        next_pathes = []
+
+        for next_path in dir_or_file_list:
+            if path == "/":
+                new_path = path + next_path
+            else:
                 new_path = path + "/" + next_path
-                self._readdir(new_path)
-        if not dir_or_file_list:
-            print(
-                f"{path}: there are no files or directories in this directory."
-            )
+
+            resp = self._query_path(new_path)
+
+            if resp == "no":
+                contents.append(f"<{next_path}>")
+                mark.append(False)
+            else:
+                contents.append(next_path)
+                mark.append(True)
+            next_pathes.append(new_path)
+
+        if not contents:
+            print(f"{path}: " + "{}")
         else:
-            print(f"{path}: {', '.join(dir_or_file_list)}")
+            print(f"{path}: {', '.join(contents)}")
+
+        for index, new_path in enumerate(next_pathes):
+            if mark[index]:
+                self._readdir(new_path)
 
     def _stat(self, path):
         if '/' != path[0]:
@@ -312,15 +346,14 @@ class Client:
 
     # Remove a path
     def _remove(self, path):
-        if '/' != path[0]:
-            path = '/' + path
         result = self._query(path)
-        print(result)
         if result != "##none##":
             dir_or_file_list = result.split(";;")
             for next_path in dir_or_file_list:
-                new_path = path + "/" + next_path
-                print(new_path)
+                if path == "/":
+                    new_path = path + next_path
+                else:
+                    new_path = path + "/" + next_path
                 self._remove(new_path)
         self._rm_dir_or_filename(path)
 
